@@ -4,7 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 public class PageDTO implements Serializable{
-
+	private static final long serialVersionUID = 1581513715335397977L;
+	
 	private List<PhoneDetailDTO> phones;
 	private Integer total;
 	

@@ -1,0 +1,1 @@
+INSERT INTO customer (id, name, phone) VALUES (0,'Walid Hammadi','(212) 6007989253');
