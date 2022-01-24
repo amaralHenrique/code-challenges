@@ -19,6 +19,13 @@ public class Customer implements Serializable {
 	private String name;
 	private String phone;
 	
+	public Customer(Long id, String name, String phone) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.phone = phone;
+	}
+	
 	public Long getId() {
 		return id;
 	}
