@@ -1,6 +1,6 @@
 package com.personalprojects.phonemanager.dto;
 
-public class PhoneDetailDTO {
+public class ResponseDetailDTO {
 
 	private String countryCode;
 	private String state;

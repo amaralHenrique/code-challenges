@@ -6,14 +6,14 @@ import java.util.List;
 public class PageDTO implements Serializable{
 	private static final long serialVersionUID = 1581513715335397977L;
 	
-	private List<PhoneDetailDTO> phones;
+	private List<ResponseDetailDTO> phones;
 	private Integer total;
 	
-	public List<PhoneDetailDTO> getPhones() {
+	public List<ResponseDetailDTO> getPhones() {
 		return phones;
 	}
 	
-	public void setPhones(List<PhoneDetailDTO> phones) {
+	public void setPhones(List<ResponseDetailDTO> phones) {
 		this.phones = phones;
 	}
 	

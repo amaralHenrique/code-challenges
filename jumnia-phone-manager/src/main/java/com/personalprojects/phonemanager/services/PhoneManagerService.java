@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 
 import com.personalprojects.phonemanager.dto.FilterDTO;
-import com.personalprojects.phonemanager.dto.PhoneDetailDTO;
+import com.personalprojects.phonemanager.dto.ResponseDetailDTO;
 import com.personalprojects.phonemanager.entities.Customer;
 import com.personalprojects.phonemanager.enumerates.CountryCodesEnum;
 import com.personalprojects.phonemanager.enumerates.CountryCodesRegexEnum;
@@ -23,7 +23,7 @@ public class PhoneManagerService {
 
 	private Pattern pattern;
 
-	public Set<PhoneDetailDTO> getPagedList(FilterDTO filter) throws Exception {
+	public Set<ResponseDetailDTO> getPagedList(FilterDTO filter) throws Exception {
 
 		// gerar uma grande lista, já ordenada
 
@@ -45,19 +45,19 @@ public class PhoneManagerService {
 		list.add(customer);
 		// END OF TEST SECTION
 
-		Set<PhoneDetailDTO> response = this.buildPhoneDetail(list, filter);
+		Set<ResponseDetailDTO> response = this.buildPhoneDetail(list, filter);
 
 		return response;
 
 	}
 
-	private Set<PhoneDetailDTO> buildPhoneDetail(List<Customer> customers, FilterDTO filter) throws Exception {
+	private Set<ResponseDetailDTO> buildPhoneDetail(List<Customer> customers, FilterDTO filter) throws Exception {
 
 		// VALIDAR SE OS FILTROS SAO VALIDOS
 
-		Set<PhoneDetailDTO> result = new HashSet<>();
-		Map<CountryCodesEnum, List<PhoneDetailDTO>> countryMapping = new HashMap<>();
-		Map<PhoneStateEnum, List<PhoneDetailDTO>> stateMapping = new HashMap<>();
+		Set<ResponseDetailDTO> result = new HashSet<>();
+		Map<CountryCodesEnum, List<ResponseDetailDTO>> countryMapping = new HashMap<>();
+		Map<PhoneStateEnum, List<ResponseDetailDTO>> stateMapping = new HashMap<>();
 
 		for (Customer customer : customers) {
 			String phone = customer.getPhone();
@@ -79,17 +79,17 @@ public class PhoneManagerService {
 				invalidCause = ErrorEnum.ERROR_VALIDATE_002.getMessage();
 			}
 
-			PhoneDetailDTO detail = this.buildDTO(country, phone);
+			ResponseDetailDTO detail = this.buildDTO(country, phone);
 
 			if (PhoneStateEnum.INVALID.equals(PhoneStateEnum.fromString(detail.getState())))
 				detail.setReasonToInvalid(invalidCause);
 
 			if (countryMapping.containsKey(country)) { // Avaliar colocar uma validacao se ha filtro para a situacao
-				List<PhoneDetailDTO> filteredCountryList = countryMapping.get(country);
+				List<ResponseDetailDTO> filteredCountryList = countryMapping.get(country);
 				filteredCountryList.add(detail);
 				countryMapping.put(country, filteredCountryList); // AVALIAR SE ESSA LINHA É REALMENTE NECESSARIA
 			} else {
-				List<PhoneDetailDTO> filteredCountryList = new ArrayList<>();
+				List<ResponseDetailDTO> filteredCountryList = new ArrayList<>();
 				filteredCountryList.add(detail);
 				countryMapping.put(country, filteredCountryList);
 			}
@@ -97,11 +97,11 @@ public class PhoneManagerService {
 			PhoneStateEnum phoneState = PhoneStateEnum.fromString(detail.getState());
 
 			if (stateMapping.containsKey(phoneState)) {// Avaliar colocar uma validacao se ha filtro para a situacao
-				List<PhoneDetailDTO> filteredStateList = stateMapping.get(phoneState);
+				List<ResponseDetailDTO> filteredStateList = stateMapping.get(phoneState);
 				filteredStateList.add(detail);
 				stateMapping.put(phoneState, filteredStateList);
 			} else {
-				List<PhoneDetailDTO> filteredStateList = new ArrayList<>();
+				List<ResponseDetailDTO> filteredStateList = new ArrayList<>();
 				filteredStateList.add(detail);
 				stateMapping.put(phoneState, filteredStateList);
 			}
@@ -111,14 +111,14 @@ public class PhoneManagerService {
 		if (filter.getFilterByCountryName() != null)
 			for (String countrySelected : filter.getFilterByCountryName()) {
 				CountryCodesEnum current = CountryCodesEnum.valueOf(countrySelected);
-				List<PhoneDetailDTO> filteredList = countryMapping.get(current);
+				List<ResponseDetailDTO> filteredList = countryMapping.get(current);
 				if (filteredList != null)
 					result.addAll(filteredList);
 			}
 
 		if (filter.getFilterByState() != null) {
 			PhoneStateEnum filterState = PhoneStateEnum.valueOf(filter.getFilterByState());
-			List<PhoneDetailDTO> filteredList = stateMapping.get(filterState);
+			List<ResponseDetailDTO> filteredList = stateMapping.get(filterState);
 			if (filteredList != null) {
 				if (result.isEmpty())
 					result.addAll(filteredList);
@@ -135,8 +135,8 @@ public class PhoneManagerService {
 		return pattern.matcher(phone).matches();
 	}
 
-	private PhoneDetailDTO buildDTO(CountryCodesEnum countryCode, String phone) {
-		PhoneDetailDTO detail = new PhoneDetailDTO();
+	private ResponseDetailDTO buildDTO(CountryCodesEnum countryCode, String phone) {
+		ResponseDetailDTO detail = new ResponseDetailDTO();
 
 		if (CountryCodesEnum.UNKNOWN.equals(countryCode)) {
 			detail.setCountryCode(phone.substring(1, 4));

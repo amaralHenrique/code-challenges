@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.personalprojects.phonemanager.dto.FilterDTO;
-import com.personalprojects.phonemanager.dto.PhoneDetailDTO;
+import com.personalprojects.phonemanager.dto.ResponseDetailDTO;
 import com.personalprojects.phonemanager.entities.Customer;
 import com.personalprojects.phonemanager.repositories.CustomerRepository;
 import com.personalprojects.phonemanager.services.PhoneManagerService;
@@ -38,7 +38,7 @@ public class PhoneManagerController {
 	}
 	
 	@PostMapping(path = "/retrieve/list")
-	public ResponseEntity<Set<PhoneDetailDTO>> getListedPage(@RequestBody(required = false) FilterDTO filter) throws Exception {
+	public ResponseEntity<Set<ResponseDetailDTO>> getListedPage(@RequestBody(required = false) FilterDTO filter) throws Exception {
 		
 		return ResponseEntity.ok(pmService.getPagedList(filter));
 		
