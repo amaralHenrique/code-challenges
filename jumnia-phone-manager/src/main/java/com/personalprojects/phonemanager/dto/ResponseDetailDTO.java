@@ -3,6 +3,7 @@ package com.personalprojects.phonemanager.dto;
 public class ResponseDetailDTO {
 
 	private String countryCode;
+	private String countryName;
 	private String state;
 	private String phoneNumber;
 	private String reasonToInvalid;
@@ -33,10 +34,16 @@ public class ResponseDetailDTO {
 		this.reasonToInvalid = reasonToInvalid;
 	}
 	
+	public String getCountryName() {
+		return countryName;
+	}
+	public void setCountryName(String countryName) {
+		this.countryName = countryName;
+	}
 	@Override
 	public String toString() {
-		return "PhoneDetailDTO [countryCode=" + countryCode + ", state=" + state + ", phoneNumber=" + phoneNumber
-				+ ", reasonToInvalid=" + reasonToInvalid + "]";
+		return "ResponseDetailDTO [countryCode=" + countryCode + ", countryName=" + countryName + ", state=" + state
+				+ ", phoneNumber=" + phoneNumber + ", reasonToInvalid=" + reasonToInvalid + "]";
 	}
 		
 }

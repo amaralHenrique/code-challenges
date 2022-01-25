@@ -142,6 +142,7 @@ public class PhoneManagerService {
 			detail.setCountryCode(phone.substring(1, 4));
 			detail.setPhoneNumber(phone);
 			detail.setState(PhoneStateEnum.INVALID.getDescription());
+			detail.setCountryName(CountryCodesEnum.UNKNOWN.name());
 
 			return detail;
 		}
@@ -150,6 +151,7 @@ public class PhoneManagerService {
 
 		detail.setCountryCode(countryCode.getDescription());
 		detail.setPhoneNumber(phone);
+		detail.setCountryName(countryCode.name());
 
 		if (validateRegex(countryRegex, phone))
 			detail.setState(PhoneStateEnum.VALID.getDescription());
