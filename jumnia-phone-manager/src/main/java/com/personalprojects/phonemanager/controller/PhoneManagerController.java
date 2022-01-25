@@ -1,7 +1,6 @@
 package com.personalprojects.phonemanager.controller;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -38,7 +37,7 @@ public class PhoneManagerController {
 	}
 	
 	@PostMapping(path = "/retrieve/list")
-	public ResponseEntity<Set<ResponseDetailDTO>> getListedPage(@RequestBody(required = false) FilterDTO filter) throws Exception {
+	public ResponseEntity<List<ResponseDetailDTO>> getListedPage(@RequestBody(required = false) FilterDTO filter) throws Exception {
 		
 		return ResponseEntity.ok(pmService.getPagedList(filter));
 		
