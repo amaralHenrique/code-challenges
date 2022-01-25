@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.personalprojects.phonemanager.dto.FilterDTO;
@@ -16,6 +17,7 @@ import com.personalprojects.phonemanager.enumerates.CountryCodesEnum;
 import com.personalprojects.phonemanager.enumerates.CountryCodesRegexEnum;
 import com.personalprojects.phonemanager.enumerates.ErrorEnum;
 import com.personalprojects.phonemanager.enumerates.PhoneStateEnum;
+import com.personalprojects.phonemanager.repositories.CustomerRepository;
 import com.personalprojects.phonemanager.utils.Pagination;
 
 @Service
@@ -23,26 +25,24 @@ public class PhoneManagerService {
 
 	private Pattern pattern;
 
+	@Autowired
+	private CustomerRepository repository;
+
 	public PageDTO getPagedList(FilterDTO filter) throws Exception {
 
-		// gerar uma grande lista, já ordenada
+		List<Customer> list = repository.findAll(CustomerService.sortByPhone(filter.getOrderDirection()));
 
-		// List<List<PhoneDetailDTO>> pagination
-		// Pageable pageable = Pageable.ofSize(filter.getPageSize());
-
-		// Page page = repository.findAll(pageable.next());
-		// TEST SECTION
-		List<Customer> list = new ArrayList<Customer>();
-		Customer customer = new Customer(1L, "Test1_name", "(237) 697151594");
-		list.add(customer);
-		customer = new Customer(2L, "Test2_name", "(237) 677046616");
-		list.add(customer);
-		customer = new Customer(3L, "Test3_name", "(258) 847651504");
-		list.add(customer);
-		customer = new Customer(4L, "Test4_name", "(250) 975751054");
-		list.add(customer);
-		customer = new Customer(5L, "Test5_name", "(31) 975751054");
-		list.add(customer);
+//		List<Customer> list = new ArrayList<Customer>();
+//		Customer customer = new Customer(1L, "Test1_name", "(237) 697151594");
+//		list.add(customer);
+//		customer = new Customer(2L, "Test2_name", "(237) 677046616");
+//		list.add(customer);
+//		customer = new Customer(3L, "Test3_name", "(258) 847651504");
+//		list.add(customer);
+//		customer = new Customer(4L, "Test4_name", "(250) 975751054");
+//		list.add(customer);
+//		customer = new Customer(5L, "Test5_name", "(31) 975751054");
+//		list.add(customer);
 		// END OF TEST SECTION
 
 		PageDTO response = this.buildPhoneDetail(list, filter);
@@ -53,8 +53,6 @@ public class PhoneManagerService {
 
 	private PageDTO buildPhoneDetail(List<Customer> customers, FilterDTO filter) throws Exception {
 
-		// VALIDAR SE OS FILTROS SAO VALIDOS P não subir exception
-
 		List<ResponseDetailDTO> result = new ArrayList<>();
 		Map<CountryCodesEnum, List<ResponseDetailDTO>> countryMapping = new HashMap<>();
 		Map<PhoneStateEnum, List<ResponseDetailDTO>> stateMapping = new HashMap<>();
@@ -62,7 +60,7 @@ public class PhoneManagerService {
 
 		for (Customer customer : customers) {
 			String phone = customer.getPhone();
-			String countryCode = phone.substring(1, 4); // Talvez melhorar isso com um split de ) e pegar o [0]
+			String countryCode = phone.substring(1, 4);
 			String invalidCause = "";
 			CountryCodesEnum country;
 
@@ -81,23 +79,24 @@ public class PhoneManagerService {
 			ResponseDetailDTO detail = this.buildDTO(country, phone);
 
 			if (PhoneStateEnum.INVALID.equals(PhoneStateEnum.fromString(detail.getState())))
-				detail.setReasonToInvalid(invalidCause);
+				detail.setReasonToInvalid(
+						invalidCause.isEmpty() ? ErrorEnum.ERROR_VALIDATE_003.getMessage() : invalidCause);
 
-			if(filter.getFilterByCountryName() != null)
+			if (filter.getFilterByCountryName() != null)
 				this.categorizeAsCountry(countryMapping, country, detail);
 
-			if(filter.getFilterByState() != null)
+			if (filter.getFilterByState() != null)
 				this.categorizeAsState(stateMapping, detail);
-			
-			if(Boolean.TRUE.equals(hasNoFilter))
+
+			if (Boolean.TRUE.equals(hasNoFilter))
 				result.add(detail);
 
 		}
 
-		if(Boolean.FALSE.equals(hasNoFilter))
-			result = this.filterList(filter, countryMapping, stateMapping);
+		if (Boolean.FALSE.equals(hasNoFilter))
+			result = this.applyFilter(filter, countryMapping, stateMapping);
 
-		return Pagination.retrievePage(result, filter);// dar um check nisso. Esta vindo vazio quando pagesize = 1
+		return Pagination.retrievePage(result, filter);
 	}
 
 	private boolean validateRegex(CountryCodesRegexEnum regex, String phone) {
@@ -130,14 +129,13 @@ public class PhoneManagerService {
 
 		return detail;
 	}
-	
-	
-	private List<ResponseDetailDTO> filterList(FilterDTO filter, 
-			Map<CountryCodesEnum, List<ResponseDetailDTO>> countryMapping, 
-			Map<PhoneStateEnum, List<ResponseDetailDTO>> stateMapping){
-		
+
+	private List<ResponseDetailDTO> applyFilter(FilterDTO filter,
+			Map<CountryCodesEnum, List<ResponseDetailDTO>> countryMapping,
+			Map<PhoneStateEnum, List<ResponseDetailDTO>> stateMapping) {
+
 		List<ResponseDetailDTO> result = new ArrayList<>();
-		
+
 		if (filter.getFilterByCountryName() != null)
 			for (String countrySelected : filter.getFilterByCountryName()) {
 				CountryCodesEnum current = CountryCodesEnum.valueOf(countrySelected);
@@ -150,45 +148,39 @@ public class PhoneManagerService {
 			PhoneStateEnum filterState = PhoneStateEnum.valueOf(filter.getFilterByState());
 			List<ResponseDetailDTO> filteredList = stateMapping.get(filterState);
 			if (filteredList != null) {
-				if (result.isEmpty())
+				if (result.isEmpty() && filter.getFilterByCountryName() == null)
 					result.addAll(filteredList);
 				else
 					result.retainAll(filteredList);
 			}
 		}
-		
-		 {
-			
-		}
-		
-		
+
 		return result;
 	}
-	
+
 	private Boolean hasFilter(FilterDTO filter) {
 		return filter.getFilterByCountryName() == null && filter.getFilterByState() == null;
 	}
 
-
-	private void categorizeAsCountry(Map<CountryCodesEnum, List<ResponseDetailDTO>> countryMapping, 
+	private void categorizeAsCountry(Map<CountryCodesEnum, List<ResponseDetailDTO>> countryMapping,
 			CountryCodesEnum country, ResponseDetailDTO detail) {
-		
-		if (countryMapping.containsKey(country)) { 
+
+		if (countryMapping.containsKey(country)) {
 			List<ResponseDetailDTO> filteredCountryList = countryMapping.get(country);
 			filteredCountryList.add(detail);
-			countryMapping.put(country, filteredCountryList); // AVALIAR SE ESSA LINHA É REALMENTE NECESSARIA
+			countryMapping.put(country, filteredCountryList);
 		} else {
 			List<ResponseDetailDTO> filteredCountryList = new ArrayList<>();
 			filteredCountryList.add(detail);
 			countryMapping.put(country, filteredCountryList);
 		}
-		
+
 	}
-	
+
 	private void categorizeAsState(Map<PhoneStateEnum, List<ResponseDetailDTO>> stateMapping,
 			ResponseDetailDTO detail) {
 		PhoneStateEnum phoneState = PhoneStateEnum.fromString(detail.getState());
-		
+
 		if (stateMapping.containsKey(phoneState)) {
 			List<ResponseDetailDTO> filteredStateList = stateMapping.get(phoneState);
 			filteredStateList.add(detail);
@@ -199,5 +191,5 @@ public class PhoneManagerService {
 			stateMapping.put(phoneState, filteredStateList);
 		}
 	}
-	
+
 }

@@ -4,6 +4,7 @@ public enum ErrorEnum {
 
 	ERROR_VALIDATE_001("V001", "The phone number could not be validated"),
 	ERROR_VALIDATE_002("V002", "Unknown country code"),
+	ERROR_VALIDATE_003("V003", "The phone number do not correspond to the country standard"),
 	ERROR_IO_001("I001","Unkown filter option selected"),
 	ERROR_PAGING_001("P001", "There are no data available");
 	
