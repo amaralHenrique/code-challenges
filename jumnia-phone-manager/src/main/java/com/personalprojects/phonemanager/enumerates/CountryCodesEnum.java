@@ -1,11 +1,12 @@
 package com.personalprojects.phonemanager.enumerates;
 
 public enum CountryCodesEnum {
-	CAMEROON("(237)"), 
-	ETHIOPIA("(251)"),
-	MOROCCO("(212)"), 
-	MOZAMBIQUE("(258)"), 
-	UGANDA("(256)");
+	CAMEROON("237"), 
+	ETHIOPIA("251"),
+	MOROCCO("212"), 
+	MOZAMBIQUE("258"), 
+	UGANDA("256"),
+	UNKNOWN("");
 
 	private String description;
 

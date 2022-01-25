@@ -2,8 +2,9 @@ package com.personalprojects.phonemanager.enumerates;
 
 public enum ErrorEnum {
 
-	ERROR_VALIDATE_001("001", "The phone number could not be validated"),
-	ERROR_VALIDATE_002("002", "Unknown country code");
+	ERROR_VALIDATE_001("V001", "The phone number could not be validated"),
+	ERROR_VALIDATE_002("V002", "Unknown country code"),
+	ERROR_IO_001("I001","Unkown filter option selected");
 	
 	private String code;
 	private String message;

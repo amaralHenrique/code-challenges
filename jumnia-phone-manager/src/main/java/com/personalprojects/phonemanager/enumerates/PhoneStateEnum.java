@@ -13,4 +13,18 @@ public enum PhoneStateEnum {
 	public String getDescription() {
 		return description;
 	}
+	
+	public static PhoneStateEnum fromString(String description) {
+		PhoneStateEnum result = null;
+		
+		if(description != null)
+			for(PhoneStateEnum phoneState : PhoneStateEnum.values()) {
+				if(description.equalsIgnoreCase(phoneState.description)) {
+					result = phoneState;
+					break;
+				}
+					
+			}
+				return result;
+	}
 }
