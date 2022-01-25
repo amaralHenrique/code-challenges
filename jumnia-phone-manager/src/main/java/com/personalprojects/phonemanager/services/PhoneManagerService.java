@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 import org.springframework.stereotype.Service;
 
 import com.personalprojects.phonemanager.dto.FilterDTO;
+import com.personalprojects.phonemanager.dto.PageDTO;
 import com.personalprojects.phonemanager.dto.ResponseDetailDTO;
 import com.personalprojects.phonemanager.entities.Customer;
 import com.personalprojects.phonemanager.enumerates.CountryCodesEnum;
@@ -22,7 +23,7 @@ public class PhoneManagerService {
 
 	private Pattern pattern;
 
-	public List<ResponseDetailDTO> getPagedList(FilterDTO filter) throws Exception {
+	public PageDTO getPagedList(FilterDTO filter) throws Exception {
 
 		// gerar uma grande lista, já ordenada
 
@@ -44,13 +45,13 @@ public class PhoneManagerService {
 		list.add(customer);
 		// END OF TEST SECTION
 
-		List<ResponseDetailDTO> response = this.buildPhoneDetail(list, filter);
+		PageDTO response = this.buildPhoneDetail(list, filter);
 
 		return response;
 
 	}
 
-	private List<ResponseDetailDTO> buildPhoneDetail(List<Customer> customers, FilterDTO filter) throws Exception {
+	private PageDTO buildPhoneDetail(List<Customer> customers, FilterDTO filter) throws Exception {
 
 		// VALIDAR SE OS FILTROS SAO VALIDOS P não subir exception
 
@@ -96,7 +97,7 @@ public class PhoneManagerService {
 		if(Boolean.FALSE.equals(hasNoFilter))
 			result = this.filterList(filter, countryMapping, stateMapping);
 
-		return Pagination.retrievePage(result, filter);
+		return Pagination.retrievePage(result, filter);// dar um check nisso. Esta vindo vazio quando pagesize = 1
 	}
 
 	private boolean validateRegex(CountryCodesRegexEnum regex, String phone) {

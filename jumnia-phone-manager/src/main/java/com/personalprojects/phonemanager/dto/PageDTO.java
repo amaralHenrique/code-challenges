@@ -8,7 +8,8 @@ public class PageDTO implements Serializable{
 	
 	private List<ResponseDetailDTO> phones;
 	private Integer total;
-	
+	private String Message;
+		
 	public List<ResponseDetailDTO> getPhones() {
 		return phones;
 	}
@@ -24,10 +25,18 @@ public class PageDTO implements Serializable{
 	public void setTotal(Integer total) {
 		this.total = total;
 	}
-	
+		
+	public String getMessage() {
+		return Message;
+	}
+
+	public void setMessage(String message) {
+		Message = message;
+	}
+
 	@Override
 	public String toString() {
-		return "PageDTO [phones=" + phones + ", total=" + total + "]";
+		return "PageDTO [phones=" + phones + ", total=" + total + ", Message=" + Message + "]";
 	}
 	
 	
