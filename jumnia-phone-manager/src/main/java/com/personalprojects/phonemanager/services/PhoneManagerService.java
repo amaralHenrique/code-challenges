@@ -30,34 +30,13 @@ public class PhoneManagerService {
 
 	public PageDTO getPagedList(FilterDTO filter) throws Exception {
 
-		List<Customer> list = repository.findAll(CustomerService.sortByPhone(filter.getOrderDirection()));
-
-//		List<Customer> list = new ArrayList<Customer>();
-//		Customer customer = new Customer(1L, "Test1_name", "(237) 697151594");
-//		list.add(customer);
-//		customer = new Customer(2L, "Test2_name", "(237) 677046616");
-//		list.add(customer);
-//		customer = new Customer(3L, "Test3_name", "(258) 847651504");
-//		list.add(customer);
-//		customer = new Customer(4L, "Test4_name", "(250) 975751054");
-//		list.add(customer);
-//		customer = new Customer(5L, "Test5_name", "(31) 975751054");
-//		list.add(customer);
-		// END OF TEST SECTION
-
-		PageDTO response = this.buildPhoneDetail(list, filter);
-
-		return response;
-
-	}
-
-	private PageDTO buildPhoneDetail(List<Customer> customers, FilterDTO filter) throws Exception {
-
 		List<ResponseDetailDTO> result = new ArrayList<>();
 		Map<CountryCodesEnum, List<ResponseDetailDTO>> countryMapping = new HashMap<>();
 		Map<PhoneStateEnum, List<ResponseDetailDTO>> stateMapping = new HashMap<>();
 		boolean hasNoFilter = this.hasFilter(filter);
-
+		
+		List<Customer> customers = repository.findAll(CustomerService.sortByPhone(filter.getOrderDirection()));
+		
 		for (Customer customer : customers) {
 			String phone = customer.getPhone();
 			String countryCode = phone.substring(1, 4);
@@ -97,6 +76,7 @@ public class PhoneManagerService {
 			result = this.applyFilter(filter, countryMapping, stateMapping);
 
 		return Pagination.retrievePage(result, filter);
+		
 	}
 
 	private boolean validateRegex(CountryCodesRegexEnum regex, String phone) {
