@@ -2,7 +2,10 @@ package com.personalprojects.phonemanager.entities;
 
 import java.io.Serializable;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -14,9 +17,15 @@ public class Customer implements Serializable {
 	private static final long serialVersionUID = 6917967487482326508L;
 	
 	@Id
+	@Basic(fetch=FetchType.LAZY)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
+	@Basic(fetch=FetchType.LAZY)
+	@Column(name="name")
 	private String name;
+	
+	@Column(name="phone")
 	private String phone;
 	
 	public Customer() {
