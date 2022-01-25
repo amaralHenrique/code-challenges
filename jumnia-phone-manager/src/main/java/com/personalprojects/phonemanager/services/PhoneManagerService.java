@@ -1,7 +1,11 @@
 package com.personalprojects.phonemanager.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Service;
@@ -16,10 +20,10 @@ import com.personalprojects.phonemanager.enumerates.PhoneStateEnum;
 
 @Service
 public class PhoneManagerService {
-	
+
 	private Pattern pattern;
 
-	public List<PhoneDetailDTO> getPagedList(FilterDTO filter) throws Exception {
+	public Set<PhoneDetailDTO> getPagedList(FilterDTO filter) throws Exception {
 
 		// gerar uma grande lista, já ordenada
 
@@ -27,7 +31,7 @@ public class PhoneManagerService {
 		// Pageable pageable = Pageable.ofSize(filter.getPageSize());
 
 		// Page page = repository.findAll(pageable.next());
-		//TEST SECTION
+		// TEST SECTION
 		List<Customer> list = new ArrayList<Customer>();
 		Customer customer = new Customer(1L, "Test1_name", "(237) 697151594");
 		list.add(customer);
@@ -35,64 +39,124 @@ public class PhoneManagerService {
 		list.add(customer);
 		customer = new Customer(3L, "Test3_name", "(258) 847651504");
 		list.add(customer);
-		//END OF TEST SECTION
-		
-		List<PhoneDetailDTO> response = this.buildPhoneDetail(list);
-		
+		customer = new Customer(4L, "Test4_name", "(250) 975751054");
+		list.add(customer);
+		customer = new Customer(5L, "Test5_name", "(31) 975751054");
+		list.add(customer);
+		// END OF TEST SECTION
+
+		Set<PhoneDetailDTO> response = this.buildPhoneDetail(list, filter);
+
 		return response;
 
 	}
 
-	private List<PhoneDetailDTO> buildPhoneDetail(List<Customer> customers) throws Exception {
+	private Set<PhoneDetailDTO> buildPhoneDetail(List<Customer> customers, FilterDTO filter) throws Exception {
 
-//		Pattern pattern = Pattern.compile(CountryCodesRegexEnum.READABLE_COUNTRY.getDescription());
-//		boolean bool =  pattern.matcher("(237) 697151594").matches();
-//		bool =  pattern.matcher("(237)").matches();
-//		bool =  pattern.matcher("(27) ").matches();
-//		bool =  pattern.matcher("(").matches();
-		
-		List<PhoneDetailDTO> result = new ArrayList<>();
+		// VALIDAR SE OS FILTROS SAO VALIDOS
+
+		Set<PhoneDetailDTO> result = new HashSet<>();
+		Map<CountryCodesEnum, List<PhoneDetailDTO>> countryMapping = new HashMap<>();
+		Map<PhoneStateEnum, List<PhoneDetailDTO>> stateMapping = new HashMap<>();
 
 		for (Customer customer : customers) {
 			String phone = customer.getPhone();
-			
-			String countryCode = phone.substring(0, 5);
-			//PhoneDetailDTO detail = new PhoneDetailDTO();
+			String countryCode = phone.substring(1, 4); // Talvez melhorar isso com um split de ) e pegar o [0]
+			String invalidCause = "";
+			CountryCodesEnum country;
 
 			pattern = Pattern.compile(CountryCodesRegexEnum.READABLE_COUNTRY.getDescription());
-			if (!pattern.matcher(countryCode).matches())
-				throw new Exception(ErrorEnum.ERROR_VALIDATE_001.getMessage());
-						
-			CountryCodesEnum country = CountryCodesEnum.fromString(countryCode);
-			if(country == null)
-				throw new Exception(ErrorEnum.ERROR_VALIDATE_002.getMessage());
-			
-			PhoneDetailDTO detail = this.buildDTO(country, phone);		
+			if (!pattern.matcher(countryCode).matches()) {
+				// throw new Exception(ErrorEnum.ERROR_VALIDATE_001.getMessage());
+				country = CountryCodesEnum.UNKNOWN;
+				invalidCause = ErrorEnum.ERROR_VALIDATE_001.getMessage();
+			}
 
-			result.add(detail);
+			country = CountryCodesEnum.fromString(countryCode);
+			if (country == null) {
+				// throw new Exception(ErrorEnum.ERROR_VALIDATE_002.getMessage());
+				country = CountryCodesEnum.UNKNOWN;
+				invalidCause = ErrorEnum.ERROR_VALIDATE_002.getMessage();
+			}
+
+			PhoneDetailDTO detail = this.buildDTO(country, phone);
+
+			if (PhoneStateEnum.INVALID.equals(PhoneStateEnum.fromString(detail.getState())))
+				detail.setReasonToInvalid(invalidCause);
+
+			if (countryMapping.containsKey(country)) { // Avaliar colocar uma validacao se ha filtro para a situacao
+				List<PhoneDetailDTO> filteredCountryList = countryMapping.get(country);
+				filteredCountryList.add(detail);
+				countryMapping.put(country, filteredCountryList); // AVALIAR SE ESSA LINHA É REALMENTE NECESSARIA
+			} else {
+				List<PhoneDetailDTO> filteredCountryList = new ArrayList<>();
+				filteredCountryList.add(detail);
+				countryMapping.put(country, filteredCountryList);
+			}
+
+			PhoneStateEnum phoneState = PhoneStateEnum.fromString(detail.getState());
+
+			if (stateMapping.containsKey(phoneState)) {// Avaliar colocar uma validacao se ha filtro para a situacao
+				List<PhoneDetailDTO> filteredStateList = stateMapping.get(phoneState);
+				filteredStateList.add(detail);
+				stateMapping.put(phoneState, filteredStateList);
+			} else {
+				List<PhoneDetailDTO> filteredStateList = new ArrayList<>();
+				filteredStateList.add(detail);
+				stateMapping.put(phoneState, filteredStateList);
+			}
+
+		}
+
+		if (filter.getFilterByCountryName() != null)
+			for (String countrySelected : filter.getFilterByCountryName()) {
+				CountryCodesEnum current = CountryCodesEnum.valueOf(countrySelected);
+				List<PhoneDetailDTO> filteredList = countryMapping.get(current);
+				if (filteredList != null)
+					result.addAll(filteredList);
+			}
+
+		if (filter.getFilterByState() != null) {
+			PhoneStateEnum filterState = PhoneStateEnum.valueOf(filter.getFilterByState());
+			List<PhoneDetailDTO> filteredList = stateMapping.get(filterState);
+			if (filteredList != null) {
+				if (result.isEmpty())
+					result.addAll(filteredList);
+				else
+					result.retainAll(filteredList);
+			}
 		}
 
 		return result;
 	}
-	
+
 	private boolean validateRegex(CountryCodesRegexEnum regex, String phone) {
 		pattern = Pattern.compile(regex.getDescription());
-		return pattern.matcher("(237) 697151594").matches();
+		return pattern.matcher(phone).matches();
 	}
 
 	private PhoneDetailDTO buildDTO(CountryCodesEnum countryCode, String phone) {
 		PhoneDetailDTO detail = new PhoneDetailDTO();
+
+		if (CountryCodesEnum.UNKNOWN.equals(countryCode)) {
+			detail.setCountryCode(phone.substring(1, 4));
+			detail.setPhoneNumber(phone);
+			detail.setState(PhoneStateEnum.INVALID.getDescription());
+
+			return detail;
+		}
+
 		CountryCodesRegexEnum countryRegex = CountryCodesRegexEnum.valueOf(countryCode.toString());
-		
-		detail.setCountryCode(countryCode.getDescription()); //AVALIAR REMOVER O PARENTESE PARA TER UM RETORNO CLEAN AO FRONT
+
+		detail.setCountryCode(countryCode.getDescription());
 		detail.setPhoneNumber(phone);
-		
-		if(validateRegex(countryRegex, phone))
+
+		if (validateRegex(countryRegex, phone))
 			detail.setState(PhoneStateEnum.VALID.getDescription());
 		else
 			detail.setState(PhoneStateEnum.INVALID.getDescription());
-		
+
 		return detail;
 	}
-	
+
 }

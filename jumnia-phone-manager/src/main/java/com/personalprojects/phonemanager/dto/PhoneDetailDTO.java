@@ -5,6 +5,8 @@ public class PhoneDetailDTO {
 	private String countryCode;
 	private String state;
 	private String phoneNumber;
+	private String reasonToInvalid;
+	
 	public String getCountryCode() {
 		return countryCode;
 	}
@@ -23,9 +25,18 @@ public class PhoneDetailDTO {
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
+	
+	public String getReasonToInvalid() {
+		return reasonToInvalid;
+	}
+	public void setReasonToInvalid(String reasonToInvalid) {
+		this.reasonToInvalid = reasonToInvalid;
+	}
+	
 	@Override
 	public String toString() {
-		return "PhoneDetailDTO [countryCode=" + countryCode + ", state=" + state + ", phoneNumber=" + phoneNumber + "]";
+		return "PhoneDetailDTO [countryCode=" + countryCode + ", state=" + state + ", phoneNumber=" + phoneNumber
+				+ ", reasonToInvalid=" + reasonToInvalid + "]";
 	}
 		
 }

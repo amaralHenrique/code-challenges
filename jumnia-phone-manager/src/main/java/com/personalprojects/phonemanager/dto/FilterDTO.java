@@ -1,11 +1,12 @@
 package com.personalprojects.phonemanager.dto;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class FilterDTO implements Serializable{
 	private static final long serialVersionUID = 3440139395619453552L;
 
-	private String filterByCountryName;
+	private List<String> filterByCountryName;
 	
 	private String filterByState;
 	
@@ -15,7 +16,7 @@ public class FilterDTO implements Serializable{
 	
 	private Integer pageNumber;
 	
-	public FilterDTO(String filterByCountryName, String filterByState, String orderDirection, Integer pageSize,
+	public FilterDTO(List<String> filterByCountryName, String filterByState, String orderDirection, Integer pageSize,
 			Integer pageNumber) {
 		super();
 		this.filterByCountryName = filterByCountryName;
@@ -25,11 +26,11 @@ public class FilterDTO implements Serializable{
 		this.pageNumber = pageNumber;
 	}
 
-	public String getFilterByCountryName() {
+	public List<String> getFilterByCountryName() {
 		return filterByCountryName;
 	}
 
-	public void setFilterByCountryName(String filterByCountryName) {
+	public void setFilterByCountryName(List<String> filterByCountryName) {
 		this.filterByCountryName = filterByCountryName;
 	}
 
