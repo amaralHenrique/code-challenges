@@ -26,6 +26,10 @@ public class FilterDTO implements Serializable{
 		this.pageNumber = pageNumber;
 	}
 
+	public FilterDTO() {
+		
+	}
+
 	public List<String> getFilterByCountryName() {
 		return filterByCountryName;
 	}

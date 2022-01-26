@@ -21,7 +21,6 @@ public class CustomerService {
 			orderDirection = null;
 		}
 		
-		
 		if(orderDirection == null)
 			sort = Sort.by(Sort.Direction.ASC, PHONE_COLUMN);
 		else
